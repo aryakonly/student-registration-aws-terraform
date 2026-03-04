@@ -47,3 +47,16 @@ resource "aws_route_table_association" "public-assoc" {
   subnet_id = aws_subnet.mysubnet-1.id
   route_table_id = aws_default_route_table.default-tb.id
 }
+
+resource "aws_eip" "nat_eip" {
+  domain = "vpc"
+}
+
+resource "aws_nat_gateway" "my-ngw" {
+  allocation_id = aws_eip.nat_eip.id
+  subnet_id     = aws_subnet.mysubnet-1.id
+
+  tags = {
+    Name = "my-ngw"
+  }
+}
