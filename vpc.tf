@@ -34,11 +34,11 @@ resource "aws_internet_gateway" "igw" {
   }
 }
 
-resource "aws_default_route_table" "example" {
+resource "aws_default_route_table" "" {
   default_route_table_id = "rtb-010c1c7fac94d3095"
 
   route {
-    cidr_block = "192.78.0.0/24"
+    cidr_block = "0.0.0.0/0"
     gateway_id = "igw-06369d3a3122d8bde"
   }
 }
