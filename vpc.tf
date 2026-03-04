@@ -15,3 +15,11 @@ resource "aws_subnet" "mysubnet-1" {
     Name = "public-sunbet"
   }
 }
+
+resource "aws_subnet" "mysubnet-1" {
+  vpc_id = "vpc-0bba4a05381dfa9f9"
+  cidr_block = "192.78.16.0/20"
+  tags = {
+    Name = "public-sunbet"
+  }
+}
