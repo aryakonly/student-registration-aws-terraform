@@ -39,6 +39,6 @@ resource "aws_default_route_table" "example" {
 
   route {
     cidr_block = "192.78.0.0/24"
-    gateway_id = aws_internet_gateway.example.id
+    gateway_id = "igw-06369d3a3122d8bde"
   }
 }
