@@ -78,3 +78,14 @@ resource "aws_route_table_association" "private-assoc" {
   route_table_id = aws_route_table.NAT-tb.id
   
 }
+
+resource "aws_instance" "Ec2Instance" {
+    ami           = "ami-051a31ab2f4d498f5"
+    instance_type = "t3.micro"
+    key_name = "mumbai-key"
+    vpc_security_group_ids = ["sg-0098f50bfc62f633d"]
+    subnet_id = aws_subnet.mysubnet-1.id
+    tags = {
+      Name = "Ec2Instance"
+    }
+}
