@@ -145,7 +145,7 @@ resource "aws_db_instance" "my_db" {
 
   instance_class = "db.t4g.micro"
 
-  db_name  = "mydatabase"
+  db_name  = "studentapp"
   username = "arya"
   password = "Aryakadam47"
 
@@ -171,10 +171,10 @@ resource "aws_instance" "Ec2Instance" {
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     cd /opt/apache-tomcat-9.0.115/webapps/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
-    cd /opt/apache-tomcat-9.0.113/lib/
+    cd /opt/apache-tomcat-9.0.115/lib/
     curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
-    FILE="/opt/tomcat/conf/context.xml"
-    sed -i '$i <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="Aryakadam47" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.endpoint}:3306/studentapp?useUnicode=yes&characterEncoding=utf8"/>' $FILE
+    FILE="/opt/tomcat-9.0.115/conf/context.xml"
+    sed -i '$i <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="Aryakadam47" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.endpoint}/studentapp?useUnicode=yes&characterEncoding=utf8"/>' $FILE
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
     /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     EOF
@@ -194,7 +194,7 @@ resource "aws_instance" "db-instance" {
     yum install mariadb105* -y
     systemctl start mariadb.service
     systemctl enable mariadb.service
-    mysql -h ${aws_db_instance.my_db.endpoint} -u arya -pAryakadam47
+    mysql -h ${aws_db_instance.my_db.endpoint} -u arya -pAryakadam47 << 'MYSQL'
     create database studentapp;
     use studentapp;
     CREATE TABLE if not exists students(student_id INT NOT NULL AUTO_INCREMENT,
@@ -206,6 +206,7 @@ resource "aws_instance" "db-instance" {
   	student_year_passed VARCHAR(10) NOT NULL,
 	  PRIMARY KEY (student_id)
 	  );
+    MYSQL
     EOF
     tags = {
       Name = var.private_instance_name
