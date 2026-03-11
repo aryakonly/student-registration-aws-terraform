@@ -141,7 +141,7 @@ resource "aws_db_instance" "my_db" {
   engine         = "mariadb"
   engine_version = "10.6"
 
-  instance_class = "db.t3.micro"
+  instance_class = "db.t4g.micro"
 
   db_name  = "mydatabase"
   username = "arya"
