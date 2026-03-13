@@ -204,7 +204,7 @@ resource "aws_instance" "db-instance" {
     subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
     #!/bin/bash
-    yum install mariadb105* -y
+    yum install mariadb105 -y
     systemctl start mariadb.service
     systemctl enable mariadb.service
 
