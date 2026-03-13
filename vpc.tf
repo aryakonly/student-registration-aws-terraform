@@ -53,10 +53,6 @@ resource "aws_route_table_association" "public-assoc" {
   subnet_id = aws_subnet.mysubnet-1.id
   route_table_id = aws_default_route_table.default-tb.id
 }
-resource "aws_route_table_association" "private-assoc" {
-  subnet_id = aws_subnet.mysubnet-2.id
-  route_table_id = aws_default_route_table.default-tb.id
-}
 
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
@@ -201,7 +197,7 @@ resource "aws_instance" "db-instance" {
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
-    subnet_id = aws_subnet.mysubnet-2.id
+    subnet_id = aws_subnet.mysubnet-1.id
     user_data = <<-EOF
     #!/bin/bash
     yum install mariadb105* -y
