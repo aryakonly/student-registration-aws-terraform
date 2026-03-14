@@ -202,7 +202,7 @@ resource "aws_instance" "db-instance" {
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
-    user_data = base64decode(file("userdata.sh"))
+    user_data = base64encode(file("userdata.sh"))
     tags = {
       Name = var.private_instance_name
     }
