@@ -125,42 +125,42 @@ resource "aws_security_group" "my-sg-1" {
   }
 }
 
-# resource "aws_db_subnet_group" "my_db_subnet" {
-#   name = "my-db-subnet-group"
+resource "aws_db_subnet_group" "my_db_subnet" {
+  name = "my-db-subnet-group"
 
-#   subnet_ids = [
-#     aws_subnet.mysubnet-1.id,
-#     aws_subnet.mysubnet-2.id
-#   ]
+  subnet_ids = [
+    aws_subnet.mysubnet-1.id,
+    aws_subnet.mysubnet-2.id
+  ]
 
-#   tags = {
-#     Name = "db-subnet-group"
-#   }
-# }
+  tags = {
+    Name = "db-subnet-group"
+  }
+}
 
-# resource "aws_db_instance" "my_db" {
+resource "aws_db_instance" "my_db" {
 
-#   identifier = "mariadb-instance"
+  identifier = "mariadb-instance"
 
-#   allocated_storage = 10
-#   storage_type      = "gp2"
+  allocated_storage = 10
+  storage_type      = "gp2"
 
-#   engine         = "mariadb"
-#   engine_version = "10.6"
+  engine         = "mariadb"
+  engine_version = "10.6"
 
-#   instance_class = "db.t4g.micro"
+  instance_class = "db.t4g.micro"
 
-#   db_name  = "studentapp"
-#   username = "arya"
-#   password = "Aryakadam47"
+  db_name  = "studentapp"
+  username = "arya"
+  password = "Aryakadam47"
 
-#   db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
-#   vpc_security_group_ids = [aws_security_group.my-sg-1.id]
+  db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
+  vpc_security_group_ids = [aws_security_group.my-sg-1.id]
 
-#   publicly_accessible = true
-#   skip_final_snapshot = true
+  publicly_accessible = true
+  skip_final_snapshot = true
 
-# }
+}
 /*
 resource "aws_instance" "Ec2Instance" {
     ami           = var.image_instance
