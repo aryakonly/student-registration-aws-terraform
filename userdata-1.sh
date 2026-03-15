@@ -8,7 +8,7 @@ curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
 cd /opt/apache-tomcat-9.0.115/lib/
 curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
 echo "Waiting for database to accept connections..."
-until mysqladmin ping -h ${aws_db_instance.my_db.address} -u admin -p${var.db_password} --silent 2>/dev/null; do
+until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
 sleep 10
 done
     
