@@ -26,7 +26,7 @@ resource "aws_subnet" "mysubnet-2" {
   vpc_id = aws_vpc.my-vpc.id
   cidr_block = var.private_cidr_block
   availability_zone = var.private_available_zone
-  map_public_ip_on_launch = true
+  map_public_ip_on_launch = false
   tags = {
     Name = var.private_subnet_name
   }
@@ -53,15 +53,11 @@ resource "aws_route_table_association" "public-assoc" {
   subnet_id = aws_subnet.mysubnet-1.id
   route_table_id = aws_default_route_table.default-tb.id
 }
-resource "aws_route_table_association" "private-assoc" {
-  subnet_id = aws_subnet.mysubnet-2.id
-  route_table_id = aws_default_route_table.default-tb.id
-}
 
 resource "aws_eip" "nat_eip" {
   domain = "vpc"
 }
-/*
+
 resource "aws_nat_gateway" "my-ngw" {
   allocation_id = aws_eip.nat_eip.id
   subnet_id     = aws_subnet.mysubnet-1.id
@@ -88,7 +84,7 @@ resource "aws_route_table_association" "private-assoc" {
   route_table_id = aws_route_table.NAT-tb.id
   
 }
-*/
+
 resource "aws_security_group" "my-sg-1" {
   name        = var.security_group_name
   description = var.description_sg
@@ -141,67 +137,75 @@ resource "aws_db_subnet_group" "my_db_subnet" {
 resource "aws_db_instance" "my_db" {
 
   identifier = "mariadb-instance"
-
   allocated_storage = 10
   storage_type      = "gp2"
-
   engine         = "mariadb"
   engine_version = "10.6"
-
   instance_class = "db.t4g.micro"
-
   db_name  = "studentapp"
   username = "arya"
-  password = "Aryakadam47"
+  password = var.db_password
 
   db_subnet_group_name   = aws_db_subnet_group.my_db_subnet.name
   vpc_security_group_ids = [aws_security_group.my-sg-1.id]
 
-  publicly_accessible = true
+  publicly_accessible = false
   skip_final_snapshot = true
 
 }
-/*
+
 resource "aws_instance" "Ec2Instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
-    user_data = <<-EOF
-    #!/bin/bash
-    yum install java -y
-    curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
-    tar -xzvf apache-tomcat-9.0.115.tar.gz -C /opt
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
-    cd /opt/apache-tomcat-9.0.115/webapps/
-    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
-    cd /opt/apache-tomcat-9.0.115/lib/
-    curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
-    python3 -c "
-    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
-    lines = f.readlines()
-    f.close()
-    resource = '    <Resource name=\"jdbc/TestDB\" auth=\"Container\" type=\"javax.sql.DataSource\" maxTotal=\"500\" maxIdle=\"30\" maxWaitMillis=\"1000\" username=\"arya\" password=\"Aryakadam47\" driverClassName=\"com.mysql.jdbc.Driver\" url=\"jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8\"/>\n'
-    lines.insert(-1, resource)
-    f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
-    f.writelines(lines)
-    f.close()
-    "
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
-    /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
-    EOF
+    user_data = base64encode(file("userdata-1.sh"))
+    # #!/bin/bash
+    # yum install java -y
+    # curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
+    # tar -xzvf apache-tomcat-9.0.115.tar.gz -C /opt
+    # /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
+    # cd /opt/apache-tomcat-9.0.115/webapps/
+    # curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
+    # cd /opt/apache-tomcat-9.0.115/lib/
+    # curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
+    # echo "Waiting for database to accept connections..."
+    # until mysqladmin ping -h ${aws_db_instance.my_db.address} -u admin -p${var.db_password} --silent 2>/dev/null; do
+    # echo "DB not ready yet, retrying in 10s..."
+    # sleep 10
+    # done
+    
+    # python3 - <<PYTHON
+    # f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
+    # lines = f.readlines()
+    # f.close()
+
+    # resource = '    <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="admin" password="${var.db_password}" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8"/>\n'
+
+    # for i, line in enumerate(lines):
+    #     if '</Context>' in line:
+    #         lines.insert(i, resource)
+    #         break
+
+    # f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
+    # f.writelines(lines)
+    # f.close()
+    # PYTHON
+    
+    # /opt/apache-tomcat-9.0.115/bin/./catalina.sh stop
+    # /opt/apache-tomcat-9.0.115/bin/./catalina.sh start
     tags = {
       Name = var.public_instance_name
     }
 }
-*/
+
 resource "aws_instance" "db-instance" {
     ami           = var.image_instance
     instance_type = var.instance_type
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
-    subnet_id = aws_subnet.mysubnet-1.id
+    subnet_id = aws_subnet.mysubnet-2.id
     user_data = base64encode(file("userdata.sh"))
     tags = {
       Name = var.private_instance_name

@@ -111,3 +111,9 @@ variable "private_instance_name" {
   type = string
   default = "application-server"
 }
+
+variable "db_password" {
+  description = "RDS intanse password"
+  type = string
+  sensitive = true
+}
