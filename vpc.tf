@@ -213,6 +213,6 @@ resource "aws_instance" "db-instance" {
 }
 
 
-# output "public-ip" {
-#   value = aws_instance.Ec2Instance.public_ip
-# }
+output "public-ip" {
+  value = aws_instance.Ec2Instance.public_ip
+}
