@@ -181,52 +181,7 @@ resource "aws_instance" "Ec2Instance" {
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-1.id
-    user_data = <<-EOF
-#!/bin/bash
-
-
-yum install java-17-amazon-corretto python3 mariadb105 -y
-
-cd /opt
-curl -O https://dlcdn.apache.org/tomcat/tomcat-9/v9.0.115/bin/apache-tomcat-9.0.115.tar.gz
-tar -xzf apache-tomcat-9.0.115.tar.gz
-
-/opt/apache-tomcat-9.0.115/bin/catalina.sh start
-
-cd /opt/apache-tomcat-9.0.115/webapps/
-curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/student.war
-
-cd /opt/apache-tomcat-9.0.115/lib/
-curl -O https://s3-us-west-2.amazonaws.com/studentapi-cit/mysql-connector.jar
-
-echo "Waiting for database to accept connections..."
-until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
-  echo "DB not ready yet, retrying in 10s..."
-  sleep 10
-done
-echo "Database is up."
-
-python3 - <<PYTHON
-f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'r')
-lines = f.readlines()
-f.close()
-
-resource = '    <Resource name="jdbc/TestDB" auth="Container" type="javax.sql.DataSource" maxTotal="500" maxIdle="30" maxWaitMillis="1000" username="arya" password="${var.db_password}" driverClassName="com.mysql.jdbc.Driver" url="jdbc:mysql://${aws_db_instance.my_db.address}:3306/studentapp?useUnicode=yes&amp;characterEncoding=utf8"/>\n'
-
-for i, line in enumerate(lines):
-    if '</Context>' in line:
-        lines.insert(i, resource)
-        break
-
-f = open('/opt/apache-tomcat-9.0.115/conf/context.xml', 'w')
-f.writelines(lines)
-f.close()
-PYTHON
-
-/opt/apache-tomcat-9.0.115/bin/catalina.sh stop
-/opt/apache-tomcat-9.0.115/bin/catalina.sh start
-
-EOF
+    user_data = base64encode(file("userdata.sh"))
     tags = {
       Name = var.public_instance_name
     }
@@ -238,40 +193,11 @@ resource "aws_instance" "db-instance" {
     key_name = var.instance_key
     vpc_security_group_ids = [aws_security_group.my-sg-1.id]
     subnet_id = aws_subnet.mysubnet-2.id
-    user_data = <<-EOF
-#!/bin/bash
-yum update -y
-yum install mariadb105 -y
-until mysqladmin ping -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} --silent 2>/dev/null; do
-  sleep 10
-done
-
-mysql -h ${aws_db_instance.my_db.address} -u arya -p${var.db_password} <<MYSQL
-CREATE DATABASE IF NOT EXISTS studentapp;
-USE studentapp;
-CREATE TABLE IF NOT EXISTS students(
-student_id INT NOT NULL AUTO_INCREMENT,
-student_name VARCHAR(100) NOT NULL,
-student_addr VARCHAR(100) NOT NULL,
-student_age VARCHAR(3) NOT NULL,
-student_qual VARCHAR(20) NOT NULL,
-student_percent VARCHAR(10) NOT NULL,
-student_year_passed VARCHAR(10) NOT NULL,
-PRIMARY KEY (student_id)
-);
-MYSQL
-    EOF
+    user_data = base64encode(file("userdata_2.sh"))
     tags = {
       Name = var.private_instance_name
     }
 }
 
 
-output "public-ip" {
-  value = aws_instance.Ec2Instance.public_ip
-}
 
-output "app_url" {
-  description = "Tomcat app URL"
-  value       = "http://${aws_instance.Ec2Instance.public_ip}:8080/student"
-}
