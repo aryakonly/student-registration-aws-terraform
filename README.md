@@ -1,4 +1,4 @@
-# terraform-vpc
+# student-registration-aws-terraform
 
 > AWS VPC Infrastructure with a Student Web Application using Terraform
 
