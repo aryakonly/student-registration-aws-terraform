@@ -1,1 +1,1 @@
-db_password="Aryakadam47"
+db_password="<DB_password>"
